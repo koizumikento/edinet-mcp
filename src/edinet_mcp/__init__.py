@@ -1,4 +1,4 @@
-from .client import list_filings
+from .client import FilingDocument, get_filing_document, list_filings
 from .server import create_server
 
-__all__ = ["create_server", "list_filings"]
+__all__ = ["FilingDocument", "create_server", "get_filing_document", "list_filings"]

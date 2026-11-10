@@ -24,5 +24,7 @@ jobs:
           import asyncio
           from edinet_mcp import create_server
 
-          assert len(asyncio.run(create_server().list_tools())) == 1
+          assert {tool.name for tool in asyncio.run(create_server().list_tools())} == {
+              "list_filings", "get_filing_document"
+          }
           PY
