@@ -4,6 +4,8 @@
 
 [uv](https://docs.astral.sh/uv/) と Git が必要です。Python 3.12以上に対応しています。[EDINETの案内](https://disclosure2dl.edinet-fsa.go.jp/guide/static/disclosure/WZEK0090_001.html)に従ってAPIキーを発行し、例の `YOUR_EDINET_API_KEY` を手元の設定で差し替えてください。
 
+[MCP登録](#mcpクライアントに登録する) · [CLI](#cliで使う) · [Pythonライブラリ](#pythonライブラリとして使う)
+
 ## MCPクライアントに登録する
 
 ### Codex
@@ -69,22 +71,32 @@ uvx --python 3.12 --from git+https://github.com/koizumikento/edinet-mcp.git@main
 
 例の `S1234567` は取得したい書類の管理番号に置き換えます。書類は最大32 MiBまで、指定した新規ファイルに保存します。結果は標準出力にUTF-8のJSONで返ります。
 
-## Pythonから呼び出す
+## Pythonライブラリとして使う
+
+自分のPythonプロジェクト（`pyproject.toml` があるディレクトリ）で依存関係に追加します。[CLIで使う](#cliで使う)と同様に、実行するシェルで `EDINET_API_KEY` を設定してください。
 
 ```sh
-git clone https://github.com/koizumikento/edinet-mcp.git
-cd edinet-mcp
-uv sync --locked
+uv add "git+https://github.com/koizumikento/edinet-mcp.git@main"
 ```
+
+次のコードを `example.py` に保存し、同じディレクトリで `uv run python example.py` を実行します。
 
 ```python
 import asyncio
 
 from edinet_mcp import get_filing_document, list_filings
 
-print(asyncio.run(list_filings("2026-06-30", document_type="120", limit=3)))
-document = asyncio.run(get_filing_document("S1234567", format="csv"))
-print(document.metadata)
+async def main() -> None:
+    filings = await list_filings("2026-06-30", document_type="120", limit=3)
+    for filing in filings["items"]:
+        if filing["csv_flag"] == "1":
+            document = await get_filing_document(filing["document_id"], format="csv")
+            print(document.metadata)
+            return
+    print("CSVを取得できる書類がありません。")
+
+
+asyncio.run(main())
 ```
 
 書類のバイト列は `document.content` から取得できます。取得上限は32 MiBです。`max_bytes` で上限を小さくできます。既にイベントループがある場合は関数を直接 `await` してください。
