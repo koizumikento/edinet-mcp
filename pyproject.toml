@@ -12,7 +12,7 @@ license = "MIT"
 dependencies = [
   "httpx>=0.28.1,<1",
   "mcp>=2.2.0,<3",
-  "pydantic>=2.13.5,<3",
+  "pydantic>=2.14.4,<3",
 ]
 
 [project.scripts]
